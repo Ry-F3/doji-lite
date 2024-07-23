@@ -4,20 +4,13 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter as Router } from "react-router-dom";
-// import { CurrentUserProvider } from "./contexts/CurrentUserContext";
-// import { ProfileDataProvider } from "./contexts/ProfileDataContext";
-import { WebSocketProvider } from './contexts/WebSocketContext';
 
 ReactDOM.render(
-  <Router>
-    <WebSocketProvider>
-      {/* <CurrentUserProvider>
-  <ProfileDataProvider> */}
+  <React.StrictMode>
+    <Router>
       <App />
-      {/* </ProfileDataProvider>
-</CurrentUserProvider> */}
-    </WebSocketProvider>
-  </Router>,
+    </Router>
+  </React.StrictMode>,
   document.getElementById("root")
 );
 
