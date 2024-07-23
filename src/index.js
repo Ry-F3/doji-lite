@@ -1,16 +1,23 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
-import { BrowserRouter as Router } from 'react-router-dom';
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import { BrowserRouter as Router } from "react-router-dom";
+// import { CurrentUserProvider } from "./contexts/CurrentUserContext";
+// import { ProfileDataProvider } from "./contexts/ProfileDataContext";
+import { WebSocketProvider } from './contexts/WebSocketContext';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <Router>
-    <App />
-    </Router >
-  </React.StrictMode>,
+  <Router>
+    <WebSocketProvider>
+      {/* <CurrentUserProvider>
+  <ProfileDataProvider> */}
+      <App />
+      {/* </ProfileDataProvider>
+</CurrentUserProvider> */}
+    </WebSocketProvider>
+  </Router>,
   document.getElementById("root")
 );
 

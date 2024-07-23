@@ -4,5 +4,5 @@ axios.defaults.baseURL = 'https://doji-lite-api-a2da6b12178c.herokuapp.com/';
 axios.defaults.headers.post['Content-Type'] = 'multipart/form-data';
 axios.defaults.withCredentials = true;
 
-// export const axiosReq = axios.create();
-// export const axiosRes = axios.create();
+export const axiosReq = axios.create();
+export const axiosRes = axios.create();
