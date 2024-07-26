@@ -1,0 +1,46 @@
+/* NavBar.module.css */
+
+/* Navbar container styling */
+.Navbar {
+  background: #c2bfbf; /* Dark background */
+  padding: 0.5rem 1rem; /* Add padding */
+  display: flex;
+  align-items: center;
+}
+
+.NavbarContainer {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.NavbarLogo {
+  color: #fff; /* White color */
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.NavbarMenu {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+}
+
+.NavbarItem {
+  /* Style for each navbar item */
+}
+
+.NavbarLinks {
+  color: #fff; /* White color */
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  transition: background 0.3s ease;
+}
+
+.NavbarLinks:hover {
+  background: #d8d4d4; /* Slightly lighter background on hover */
+  border-radius: 4px; /* Rounded corners */
+}
