@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useProfileData } from "../../contexts/ProfileDataContext"; // Import the custom hook
 import { useCurrentUser } from "../../contexts/CurrentUserContext";
+import ListItemButton from "@mui/material/ListItemButton";
 
 const HomePage = () => {
   const profileData = useProfileData(); // Access profile data from context
@@ -23,9 +24,9 @@ const HomePage = () => {
   return (
     <div style={styles.container}>
       <h1>Welcome to the Home Page!</h1>
-      <button style={styles.button} onClick={handleToggleDetails}>
+      <ListItemButton style={styles.button} onClick={handleToggleDetails}>
         {showDetails ? "Hide" : "Show"} User Details
-      </button>
+      </ListItemButton>
       {showDetails && (
         <div style={styles.profileContainer}>
           <h2>User Details:</h2>
@@ -67,11 +68,6 @@ const styles = {
     padding: "20px",
     textAlign: "center",
     fontFamily: "Arial, sans-serif",
-  },
-  button: {
-    padding: "10px 20px",
-    fontSize: "16px",
-    cursor: "pointer",
   },
   profileContainer: {
     marginTop: "20px",

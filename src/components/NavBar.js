@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "../styles/NavBar.module.css"; // Import CSS Modules
 import { NavLink } from "react-router-dom";
 import {
   useCurrentUser,
@@ -23,13 +22,13 @@ const NavBar = () => {
 
   const loggedOutIcons = (
     <>
-      <li className={styles.NavbarItem}>
-        <NavLink to="/signin" className={styles.NavbarLinks}>
+      <li className="nav-item">
+        <NavLink to="/signin" className="nav-link text-muted">
           SignIn
         </NavLink>
       </li>
-      <li className={styles.NavbarItem}>
-        <NavLink to="/signup" className={styles.NavbarLinks}>
+      <li className="nav-item">
+        <NavLink to="/signup" className="nav-link text-muted">
           SignUp
         </NavLink>
       </li>
@@ -38,9 +37,9 @@ const NavBar = () => {
 
   const loggedInIcons = (
     <>
-      <li className={styles.NavbarItem}>Welcome, {currentUser?.username}</li>
-      <li className={styles.NavbarItem}>
-        <NavLink to="/" className={styles.NavbarLinks} onClick={handleSignOut}>
+      <li className="nav-item text-muted">Welcome, {currentUser?.username}</li>
+      <li className="nav-item">
+        <NavLink to="/" className="nav-link text-muted" onClick={handleSignOut}>
           Logout
         </NavLink>
       </li>
@@ -48,19 +47,16 @@ const NavBar = () => {
   );
 
   return (
-    <nav className={styles.Navbar}>
-      <div className={styles.NavbarContainer}>
-        <NavLink to="/" className={styles.NavbarLogo}>
+    <nav className="navbar navbar-expand-lg navbar-light bg-light">
+      <div className="container d-flex justify-content-between align-items-center">
+        {/* <NavLink to="/" className="navbar-brand">
           MyApp
-        </NavLink>
-        <ul className={styles.NavbarMenu}>
-          <li className={styles.NavbarItem}>
-            <NavLink to="/" className={styles.NavbarNavLinks}>
-              Home
-            </NavLink>
-          </li>
-          {currentUser ? loggedInIcons : loggedOutIcons}
-        </ul>
+        </NavLink> */}
+        <div className="collapse navbar-collapse">
+          <ul className="navbar-nav ml-auto d-flex align-items-center ml-2">
+            {currentUser ? loggedInIcons : loggedOutIcons}
+          </ul>
+        </div>
       </div>
     </nav>
   );
