@@ -1,33 +1,44 @@
-import React from "react";
-import { useEffect } from "react";
+import React, { useMemo } from "react";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
+import ListItemButton from "@mui/material/ListItemButton";
 import { useResponsive } from "../hooks/use-responsive";
 import { usePathname } from "../routes/use-pathname";
-import ListItemButton from "@mui/material/ListItemButton";
+import { useCurrentUser, useSetCurrentUser } from "../contexts/CurrentUserContext";
 import { NAV } from "../config/config-layout";
-import navConfig from "../config/config-navigation";
-
-// ----------------------------------------------------------------------
+import {
+  authenticatedNavConfig,
+  unauthenticatedNavConfig,
+} from "../config/config-navigation"; // Correctly import named exports
+import axios from "axios";
+import { useHistory } from "react-router-dom";
 
 export default function Nav({ openNav, onCloseNav }) {
   const pathname = usePathname();
   const isLgUp = useResponsive("up", "lg");
+  const currentUser = useCurrentUser(); // Get current user context
+  const setCurrentUser = useSetCurrentUser();
+  const history = useHistory();
 
-  useEffect(() => {
-    if (openNav) {
-      onCloseNav();
+  const handleSignOut = async () => {
+    console.log("Sign out initiated");
+    try {
+      await axios.post("dj-rest-auth/logout/");
+      localStorage.removeItem('authToken');
+      setCurrentUser(null);
+      console.log("Redirecting to /signin");
+      history.push("/signin");
+    } catch (err) {
+      console.log("Error during sign-out:", err);
     }
-  }, [pathname, openNav, onCloseNav]);
+  };
 
-  const renderContent = (
-    <Box sx={{ display: "flex", flexDirection: "column", height: 5, p: 5 }}>
-      {navConfig.map((item) => (
-        <NavItem key={item.title} item={item} />
-      ))}
-    </Box>
-  );
+  const navConfig = useMemo(() => {
+    return currentUser
+      ? authenticatedNavConfig(handleSignOut)
+      : unauthenticatedNavConfig;
+  }, [currentUser, handleSignOut]);
 
   return (
     <Box
@@ -44,14 +55,22 @@ export default function Nav({ openNav, onCloseNav }) {
             borderRight: 1,
             borderColor: "divider",
           }}>
-          {renderContent}
+          <Box sx={{ display: "flex", flexDirection: "column", height: 5, p: 5 }}>
+            {navConfig.map((item) => (
+              <NavItem key={item.title} item={item} />
+            ))}
+          </Box>
         </Box>
       ) : (
         <Drawer
           open={openNav}
           onClose={onCloseNav}
           PaperProps={{ sx: { width: NAV.WIDTH } }}>
-          {renderContent}
+          <Box sx={{ display: "flex", flexDirection: "column", height: 5, p: 5 }}>
+            {navConfig.map((item) => (
+              <NavItem key={item.title} item={item} />
+            ))}
+          </Box>
         </Drawer>
       )}
     </Box>
@@ -63,16 +82,22 @@ Nav.propTypes = {
   onCloseNav: PropTypes.func,
 };
 
-// ----------------------------------------------------------------------
-
 function NavItem({ item }) {
   const pathname = usePathname();
   const active = item.path === pathname;
+
+  const handleClick = (event) => {
+    if (item.onClick) {
+      event.preventDefault(); // Prevent the default anchor behavior if onClick is provided
+      item.onClick(); // Call the onClick function
+    }
+  };
 
   return (
     <ListItemButton
       component="a"
       href={item.path}
+      onClick={handleClick} // Attach the handleClick function
       sx={{
         minHeight: 44,
         borderRadius: 1,

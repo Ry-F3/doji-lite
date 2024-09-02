@@ -17,7 +17,7 @@ function App() {
       {/* <NavBar /> */}
       <DashboardLayout>
         <Switch>
-          <Route exact path="/" render={() => <Layout />} />
+          <Route exact path="/dashboard" render={() => <Layout />} />
           <Route exact path="/signin" render={() => <SignInForm />} />
           <Route exact path="/signup" render={() => <SignUpForm />} />
           <Route render={() => <p>Page not found!</p>} />

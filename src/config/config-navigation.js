@@ -10,10 +10,10 @@ const icon = (name) => (
   />
 );
 
-const navConfig = [
+const authenticatedNavConfig = (handleSignOut) => [
   {
     title: "dashboard",
-    path: "/",
+    path: "/dashboard",
     icon: icon("ic_analytics"),
   },
   {
@@ -32,8 +32,8 @@ const navConfig = [
     icon: icon("ic_blog"),
   },
   {
-    title: "login",
-    path: "/login",
+    title: "logout",
+    onClick: handleSignOut,
     icon: icon("ic_lock"),
   },
   {
@@ -43,4 +43,22 @@ const navConfig = [
   },
 ];
 
-export default navConfig;
+const unauthenticatedNavConfig = [
+  {
+    title: "sign in",
+    path: "/signin",
+    icon: icon("ic_lock"),
+  },
+  {
+    title: "sign up",
+    path: "/signup",
+    icon: icon("ic_lock"),
+  },
+  {
+    title: "Not found",
+    path: "/404",
+    icon: icon("ic_disabled"),
+  },
+];
+
+export { authenticatedNavConfig, unauthenticatedNavConfig };
