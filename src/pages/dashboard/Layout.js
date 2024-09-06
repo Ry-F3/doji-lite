@@ -3,6 +3,8 @@ import { Container, Row, Col, Card, ListGroup } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import NavBar from "../../components/NavBar";
 import navBoxStyles from "../../styles/Layout.module.css";
+// Components
+import TradeUploadButton from "../../components/dashboard/TradeUploadButton";
 
 // Skeleton loader component
 const SkeletonLoader = ({ width, height }) => (
@@ -95,49 +97,8 @@ const AppView = () => {
           )}
         </Row>
 
-        <Row className="g-3 mb-4">
-          {loading ? (
-            <>
-              <Col xs={12} md={6} lg={8}>
-                <Card
-                  className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
-                  <Card.Body>
-                    <SkeletonLoader width="100%" height="15rem" />
-                  </Card.Body>
-                </Card>
-              </Col>
-
-              <Col xs={12} md={6} lg={4}>
-                <Card
-                  className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
-                  <Card.Body>
-                    <SkeletonLoader width="100%" height="15rem" />
-                  </Card.Body>
-                </Card>
-              </Col>
-            </>
-          ) : (
-            <>
-              <Col xs={12} md={6} lg={8}>
-                <Card
-                  className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
-                  <Card.Body>
-                    <Card.Title>Website Visits</Card.Title>
-                  </Card.Body>
-                </Card>
-              </Col>
-
-              <Col xs={12} md={6} lg={4}>
-                <Card
-                  className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
-                  <Card.Body>
-                    <Card.Title>Current Visits</Card.Title>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </>
-          )}
-        </Row>
+    
+       
 
         <Row className="g-3 mb-4">
           {loading ? (
@@ -175,7 +136,7 @@ const AppView = () => {
                 <Card
                   className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
                   <Card.Body>
-                    <Card.Title>Current Subject</Card.Title>
+                    <TradeUploadButton/>
                   </Card.Body>
                 </Card>
               </Col>

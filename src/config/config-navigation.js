@@ -36,11 +36,11 @@ const authenticatedNavConfig = (handleSignOut) => [
     onClick: handleSignOut,
     icon: icon("ic_lock"),
   },
-  {
-    title: "Not found",
-    path: "/404",
-    icon: icon("ic_disabled"),
-  },
+  // {
+  //   title: "Not found",
+  //   path: "/404",
+  //   icon: icon("ic_disabled"),
+  // },
 ];
 
 const unauthenticatedNavConfig = [
