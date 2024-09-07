@@ -5,6 +5,8 @@ import NavBar from "../../components/NavBar";
 import navBoxStyles from "../../styles/Layout.module.css";
 // Components
 import TradeUploadButton from "../../components/dashboard/TradeUploadButton";
+import TradeUploadList from "../../components/dashboard/TradeUploadList";
+import DeleteAllTradesButton from "../../components/dashboard/TradeDeleteButton";
 
 // Skeleton loader component
 const SkeletonLoader = ({ width, height }) => (
@@ -20,12 +22,21 @@ const SkeletonLoader = ({ width, height }) => (
 
 const AppView = () => {
   const [loading, setLoading] = useState(true);
+  const [uploadTrigger, setUploadTrigger] = useState(false);
+
+  const handleUploadSuccess = () => {
+    setUploadTrigger(prev => !prev); // Toggle the state to trigger refresh
+  };
+
+  const handleDeleteSuccess = () => {
+    setUploadTrigger(prev => !prev); // Toggle the state to trigger refresh
+  };
 
   useEffect(() => {
     // Simulate data loading
     setTimeout(() => {
       setLoading(false);
-    }, 2000); // Replace with actual data fetching logic
+    }, 500); // Replace with actual data fetching logic
   }, []);
 
   return (
@@ -127,7 +138,7 @@ const AppView = () => {
                 <Card
                   className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
                   <Card.Body>
-                    <Card.Title>Conversion Rates</Card.Title>
+                    <DeleteAllTradesButton onDeleteSuccess={handleDeleteSuccess}/>
                   </Card.Body>
                 </Card>
               </Col>
@@ -136,7 +147,7 @@ const AppView = () => {
                 <Card
                   className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
                   <Card.Body>
-                    <TradeUploadButton/>
+                    <TradeUploadButton onUploadSuccess={handleUploadSuccess}/>
                   </Card.Body>
                 </Card>
               </Col>
@@ -171,17 +182,8 @@ const AppView = () => {
                 <Card
                   className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
                   <Card.Body>
-                    <Card.Title>News Update</Card.Title>
-                    <ListGroup>
-                      {[...Array(5)].map((_, index) => (
-                        <ListGroup.Item
-                          key={index}
-                          className="border-0 rounded-3">
-                          <div>News Title {index + 1}</div>
-                          <div>News Description goes here</div>
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
+                    {/* <Card.Title>News Update</Card.Title> */}
+                    <TradeUploadList trigger={uploadTrigger}/>
                   </Card.Body>
                 </Card>
               </Col>
