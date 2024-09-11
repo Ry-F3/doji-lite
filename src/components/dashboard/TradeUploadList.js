@@ -30,13 +30,18 @@ export default function TradeUploadList({ trigger }) {
         // console.log(ownerUsername);
 
         const response = await axios.get(
-          `trades-csv/?page=${page}&search=ricky102`
-        ); // API accepts `page` query parameter
-        // const ownerId = profileData
-        //   ? profileData.find((profile) => profile.isOwner)?.id
-        //   : null; // Get owner ID from profileData
+          `trades-csv/?page=${page}&search=royal90s`,
+          {
+            withCredentials: true, // Ensure cookies or tokens are sent along with the request
+            headers: {
+              // 'Accept': 'multipart/form-data',
+              // 'Content-Type': 'multipart/form-data',
+              // 'Access-Control-Allow-Origin': '*', // Modify this based on server-side CORS settings
+              // 'Access-Control-Allow-Credentials': 'true',
+            },
+          });
 
-        const ownerId = 5
+        const ownerId = 1
 
         // console.log(ownerId);
         // console.log(ownerUsername);
