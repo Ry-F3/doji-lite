@@ -74,20 +74,21 @@ export default function TradeUploadList({ trigger }) {
 
   // Pagination control functions
   const goToNextPage = () => {
-    console.log("click");
     if (currentPage < totalPages) {
-      setCurrentPage((prevPage) => prevPage + 1); // Set page to the next one
-      console.log(currentPage);
-      fetchCsvTrades();
+      const nextPage = currentPage + 1;
+      setCurrentPage(nextPage); // Set page to the next one
+      fetchCsvTrades(nextPage); // Pass the nextPage value
     }
   };
 
   const goToPreviousPage = () => {
     if (currentPage > 1) {
-      setCurrentPage((prevPage) => prevPage - 1); // Set page to the previous one
-      fetchCsvTrades();
+      const prevPage = currentPage - 1;
+      setCurrentPage(prevPage); // Set page to the previous one
+      fetchCsvTrades(prevPage); // Pass the prevPage value
     }
   };
+  
 
   return (
     <>

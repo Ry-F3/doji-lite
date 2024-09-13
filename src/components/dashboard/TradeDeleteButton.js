@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { Button, Alert } from 'react-bootstrap';
 
-const DeleteAllTradesButton = ({onDeleteSuccess}) => {
+const DeleteAllTradesButton = ({ onDeleteSuccess, refreshData }) => {
     const [isDeleting, setIsDeleting] = React.useState(false);
     const [error, setError] = React.useState(null);
     const [successMessage, setSuccessMessage] = React.useState('');
@@ -14,10 +14,13 @@ const DeleteAllTradesButton = ({onDeleteSuccess}) => {
 
         try {
             const response = await axios.delete('trades-delete/', {
-            
+                // You might need to add headers or other settings here if required
             });
             setSuccessMessage(response.data.message);
-            onDeleteSuccess();
+            onDeleteSuccess(); // Notify parent component about the success
+            if (refreshData) {
+                refreshData(); // Trigger a refresh of the trades data
+            }
         } catch (error) {
             setError(error.response?.data?.message || 'An error occurred');
         } finally {

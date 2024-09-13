@@ -10,6 +10,7 @@ import SignInForm from "./pages/auth/SignInForm";
 // import TradeForm from "./pages/dashboard/TradeForm";
 import DashboardLayout from "./components/DashBoardLayout";
 import Layout from "./pages/dashboard/Layout";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
   return (
@@ -17,9 +18,10 @@ function App() {
       {/* <NavBar /> */}
       <DashboardLayout>
         <Switch>
-          <Route exact path="/dashboard" render={() => <Layout />} />
+          
           <Route exact path="/signin" render={() => <SignInForm />} />
           <Route exact path="/signup" render={() => <SignUpForm />} />
+          <ProtectedRoute exact path="/dashboard" component={Layout} />
           <Route render={() => <p>Page not found!</p>} />
         </Switch>
       </DashboardLayout>
