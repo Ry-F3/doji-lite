@@ -13,7 +13,7 @@ const DeleteAllTradesButton = ({ onDeleteSuccess, refreshData }) => {
         setSuccessMessage('');
 
         try {
-            const response = await axios.delete('trades-delete/', {
+            const response = await axios.delete('trades-csv/delete-all/', {
                 // You might need to add headers or other settings here if required
             });
             setSuccessMessage(response.data.message);

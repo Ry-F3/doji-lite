@@ -7,6 +7,7 @@ import navBoxStyles from "../../styles/Layout.module.css";
 import TradeUploadButton from "../../components/dashboard/TradeUploadButton";
 import TradeUploadList from "../../components/dashboard/TradeUploadList";
 import DeleteAllTradesButton from "../../components/dashboard/TradeDeleteButton";
+import FileNameList from "../../components/dashboard/FileNameList";
 
 // Skeleton loader component
 const SkeletonLoader = ({ width, height }) => (
@@ -192,16 +193,7 @@ const AppView = () => {
                 <Card
                   className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
                   <Card.Body>
-                    <Card.Title>Order Timeline</Card.Title>
-                    <ListGroup>
-                      {[...Array(5)].map((_, index) => (
-                        <ListGroup.Item
-                          key={index}
-                          className="border-0 rounded-3">
-                          Order event {index + 1}
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
+                    <FileNameList/>
                   </Card.Body>
                 </Card>
               </Col>
