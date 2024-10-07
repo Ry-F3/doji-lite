@@ -1,25 +1,45 @@
 .Row {
-  height: calc(100vh - 81px);
+  height: calc(100vh - 210px);
 }
 .Input {
-  background: #ffffff;
+  background: transparent;
+  box-sizing: border-box;
+  text-align: center;
+  padding: 15px !important;
+  font-size: 18px !important;
+}
+
+/* .InputProps {
+  background: transparent;
   border: 1px solid #f0f1f9;
   box-sizing: border-box;
-  border-radius: 2px;
-  color: #7177a1;
+  border-radius: 20px;
+  color: transparent;
   text-align: center;
-  padding: 10px;
-}
+  
+  
+} */
 
 .Header {
   font-style: normal;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 20px;
   line-height: 19px;
   text-align: center;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #2142b2;
+  color: #5d5e61;
+}
+
+.Header2 {
+  font-style: normal;
+  font-weight: bold;
+  font-size: 13px;
+  line-height: 19px;
+  text-align: center;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #8e9199;
 }
 
 .Link {

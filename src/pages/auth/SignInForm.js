@@ -50,8 +50,8 @@ function SignInForm() {
   };
 
   return (
-    <Row className={styles.Row}>
-      <Col className="my-auto p-0 p-md-2" md={6}>
+    <Row className={`d-flex justify-content-center align-items-center ${styles.Row}`}>
+      <Col className="my-auto p-0 p-md-2" md={5}>
         <Container className={`${appStyles.Content} p-4 `}>
           <h1 className={styles.Header}>sign in</h1>
           <Form onSubmit={handleSubmit}>
@@ -61,7 +61,7 @@ function SignInForm() {
                 type="text"
                 placeholder="Username"
                 name="username"
-                className={styles.Input}
+                className={`bg-transparent ${styles.Input}`}
                 value={username}
                 onChange={handleChange}
               />
@@ -78,7 +78,7 @@ function SignInForm() {
                 type="password"
                 placeholder="Password"
                 name="password"
-                className={styles.Input}
+                className={`bg-transparent ${styles.Input}`}
                 value={password}
                 onChange={handleChange}
               />
@@ -99,17 +99,10 @@ function SignInForm() {
               </Alert>
             ))}
           </Form>
-        </Container>
-        <Container className={`mt-3 ${appStyles.Content}`}>
-          <Link className={styles.Link} to="/signup">
+          <Link className={`${styles.Link} mt-3`} to="/signup">
             Don't have an account? <span>Sign up now!</span>
           </Link>
         </Container>
-      </Col>
-      <Col
-        md={6}
-        className={`my-auto d-none d-md-block p-2 ${styles.SignInCol}`}>
-        <Image className={`${appStyles.FillerImage}`} src={""} />
       </Col>
     </Row>
   );

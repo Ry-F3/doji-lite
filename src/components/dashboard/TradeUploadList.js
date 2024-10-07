@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
-import { useProfileData } from "../../contexts/ProfileDataContext";
+// import { useProfileData } from "../../contexts/ProfileDataContext";
 
 export default function TradeUploadList({ trigger }) {
   const [csvTrades, setCsvTrades] = useState([]);
@@ -11,7 +11,6 @@ export default function TradeUploadList({ trigger }) {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-
     const options = { year: "numeric", month: "short", day: "2-digit" };
     return date.toLocaleDateString("en-US", options).replace(",", ""); // Remove comma for formatting
   };
@@ -23,53 +22,43 @@ export default function TradeUploadList({ trigger }) {
     async (page) => {
       setIsLoading(true); // Start loading
       try {
-        // const ownerProfile = profileData
-        //   ? profileData.find((profile) => profile.isOwner)
-        //   : null;
-        // const ownerUsername = ownerProfile ? ownerProfile.owner : null;
-        // console.log(ownerUsername);
-
+        // Fetch trades from the server
         const response = await axios.get(
           `trades-csv/?page=${page}&search=royal90s`,
           {
             withCredentials: true, // Ensure cookies or tokens are sent along with the request
-            headers: {
-              // 'Accept': 'multipart/form-data',
-              // 'Content-Type': 'multipart/form-data',
-              // 'Access-Control-Allow-Origin': '*', // Modify this based on server-side CORS settings
-              // 'Access-Control-Allow-Credentials': 'true',
-            },
-          });
+          }
+        );
 
-        const ownerId = 1
-
-        // console.log(ownerId);
-        // console.log(ownerUsername);
+        const ownerId = 1; // Assuming you have a static ownerId for now
         if (!ownerId) return; // Exit if ownerId is not available
 
+        // Filter trades for the specific owner
         const filteredTrades = response.data.results.filter(
           (trade) => trade.owner === ownerId
         );
+
+        // Log the trades received from the server
+        console.log("Fetched trades from server:", response.data.results);
+        console.log("Filtered trades for owner:", filteredTrades);
+
         setCsvTrades(filteredTrades);
 
         // Calculate total pages
         const totalTrades = response.data.count; // Total trades count
         setTotalPages(Math.ceil(totalTrades / tradesPerPage));
-
         setCurrentPage(page); // Update current page
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching trades:", error);
       } finally {
         setIsLoading(false); // Stop loading
       }
     },
-    [ tradesPerPage]
+    [tradesPerPage]
   );
 
   useEffect(() => {
-  
-      fetchCsvTrades(currentPage);
-   
+    fetchCsvTrades(currentPage);
   }, [fetchCsvTrades, currentPage, trigger]);
 
   // Pagination control functions
@@ -88,7 +77,6 @@ export default function TradeUploadList({ trigger }) {
       fetchCsvTrades(prevPage); // Pass the prevPage value
     }
   };
-  
 
   return (
     <>
@@ -113,21 +101,25 @@ export default function TradeUploadList({ trigger }) {
               </tr>
             </thead>
             <tbody>
-              {csvTrades.map((trade, index) => (
-                <tr key={index}>
-                  <td>{trade.id}</td>
-                  <td>{formatDate(trade.order_time)}</td>
-                  <td>{trade.underlying_asset}</td>
-                  <td>{trade.side}</td>
-                  <td>{trade.original_filled_quantity_formatted}</td>
-                  <td>{trade.avg_fill_formatted}</td>
-                  <td>{trade.leverage}</td>
-                  <td>{trade.pnl_formatted}</td>
-                  <td>{trade.pnl_percentage_formatted}</td>
-                  <td>{trade.is_open ? "Yes" : "No"}</td>
-                  <td>{trade.is_matched ? "Yes" : "No"}</td>
-                </tr>
-              ))}
+              {csvTrades.map((trade, index) => {
+                // Log each trade being rendered
+                console.log(`Rendering trade at index ${index}:`, trade);
+                return (
+                  <tr key={index}>
+                    <td>{trade.id}</td>
+                    <td>{formatDate(trade.order_time)}</td>
+                    <td>{trade.underlying_asset}</td>
+                    <td>{trade.side}</td>
+                    <td>{trade.original_filled_quantity_formatted}</td>
+                    <td>{trade.avg_fill_formatted}</td>
+                    <td>{trade.leverage}</td>
+                    <td>{trade.pnl_formatted}</td>
+                    <td>{trade.pnl_percentage_formatted}</td>
+                    <td>{trade.is_open ? "Yes" : "No"}</td>
+                    <td>{trade.is_matched ? "Yes" : "No"}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
 

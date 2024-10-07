@@ -46,16 +46,17 @@ const SignUpForm = () => {
   };
 
   return (
-    <Row className={styles.Row}>
-      <Col className="my-auto py-2 p-md-2" md={6}>
+    <Row className={`d-flex justify-content-center align-items-start ${styles.Row}`}>
+      <Col className="my-auto py-2 p-md-2" md={5}>
         <Container className={`${appStyles.Content} p-4 `}>
-          <h1 className={styles.Header}>sign up</h1>
+          <h1 className={`${styles.Header} p-1`}>Welcome to Doji-Lite Trading Journal</h1>
+          <h2 className={`${styles.Header2} p-3`}>We help traders fight back!</h2>
 
-          <Form onSubmit={handleSubmit}>
-            <Form.Group controlId="username">
+          <Form onSubmit={`${handleSubmit} p-3`}>
+            <Form.Group controlId="username" className={`${styles.InputPorps}`}>
               <Form.Label className="d-none">username</Form.Label>
               <Form.Control
-                className={styles.Input}
+                className={`bg-transparent ${styles.Input}`}
                 type="text"
                 placeholder="Username"
                 name="username"
@@ -72,7 +73,7 @@ const SignUpForm = () => {
             <Form.Group controlId="password1">
               <Form.Label className="d-none">Password</Form.Label>
               <Form.Control
-                className={styles.Input}
+                className={`bg-transparent ${styles.Input}`}
                 type="password"
                 placeholder="Password"
                 name="password1"
@@ -89,7 +90,7 @@ const SignUpForm = () => {
             <Form.Group controlId="password2">
               <Form.Label className="d-none">Confirm password</Form.Label>
               <Form.Control
-                className={styles.Input}
+                className={`bg-transparent ${styles.Input}`}
                 type="password"
                 placeholder="Confirm password"
                 name="password2"
@@ -114,18 +115,11 @@ const SignUpForm = () => {
               </Alert>
             ))}
           </Form>
-        </Container>
-
-        <Container className={`mt-3 ${appStyles.Content}`}>
-          <Link className={styles.Link} to="/signin">
+          <Link className={`${styles.Link} mt-3`} to="/signin">
             Already have an account? <span>Sign in</span>
           </Link>
         </Container>
-      </Col>
-      <Col
-        md={6}
-        className={`my-auto d-none d-md-block p-2 ${styles.SignUpCol}`}>
-        <Image className={`${appStyles.FillerImage}`} src={""} />
+          
       </Col>
     </Row>
   );
