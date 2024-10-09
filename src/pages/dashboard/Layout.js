@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from 'axios';
+import axios from "axios";
 import { Container, Row, Col, Card, ListGroup } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import NavBar from "../../components/NavBar";
@@ -27,36 +27,37 @@ const AppView = () => {
   const [uploadTrigger, setUploadTrigger] = useState(false);
   const [fileNames, setFileNames] = useState([]); // State for file names
   const [isLoadingFiles, setIsLoadingFiles] = useState(false);
+  const [allProcessed, setAllProcessed] = useState(false);
 
   const fetchFileNames = async () => {
     setIsLoadingFiles(true);
     try {
-      const response = await axios.get('filenames/');
+      const response = await axios.get("filenames/");
       if (Array.isArray(response.data.results)) {
         setFileNames(response.data.results);
       } else {
-        console.error('Expected an array but got:', response.data.results);
+        console.error("Expected an array but got:", response.data.results);
       }
     } catch (error) {
-      console.error('Error fetching file names:', error);
+      console.error("Error fetching file names:", error);
     } finally {
       setIsLoadingFiles(false);
     }
   };
 
   const handleUploadSuccess = () => {
-    setUploadTrigger(prev => !prev); // Toggle the state to trigger refresh
+    setUploadTrigger((prev) => !prev); // Toggle the state to trigger refresh
     fetchFileNames();
   };
 
   const handleDeleteSuccess = () => {
-    setUploadTrigger(prev => !prev); // Toggle the state to trigger refresh
+    setUploadTrigger((prev) => !prev); // Toggle the state to trigger refresh
     fetchFileNames();
   };
 
   useEffect(() => {
     // Simulate data loading
-    fetchFileNames(); 
+    fetchFileNames();
     setTimeout(() => {
       setLoading(false);
     }, 500); // Replace with actual data fetching logic
@@ -131,9 +132,6 @@ const AppView = () => {
           )}
         </Row>
 
-    
-       
-
         <Row className="g-3 mb-4">
           {loading ? (
             <>
@@ -161,16 +159,28 @@ const AppView = () => {
                 <Card
                   className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
                   <Card.Body>
-                    <DeleteAllTradesButton onDeleteSuccess={handleDeleteSuccess}/>
+                    {/* <DeleteAllTradesButton onDeleteSuccess={handleDeleteSuccess}/> */}
                   </Card.Body>
                 </Card>
               </Col>
 
               <Col xs={12} md={6} lg={4}>
                 <Card
-                  className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
-                  <Card.Body>
-                    <TradeUploadButton onUploadSuccess={handleUploadSuccess}/>
+                  className={`text-center shadow-sm border-0 rounded bg-light`}
+                  style={{ height: "100%" }} // Optional: ensure the card has a defined height
+                >
+                  <Card.Body className="d-flex p-0 h-100">
+                    {" "}
+                    {/* Flex and full height */}
+                    <div style={{ flex: 1, width: "100%", height: "100%" }}>
+                      {" "}
+                      {/* Container for the button */}
+                      <TradeUploadButton
+                        onUploadSuccess={handleUploadSuccess}
+                        isMatchingInProgress={!allProcessed}
+                        style={{ width: "100%", height: "100%" }} // Fill parent container
+                      />
+                    </div>
                   </Card.Body>
                 </Card>
               </Col>
@@ -206,7 +216,11 @@ const AppView = () => {
                   className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
                   <Card.Body>
                     {/* <Card.Title>News Update</Card.Title> */}
-                    <TradeUploadList trigger={uploadTrigger}/>
+                    <TradeUploadList
+                      trigger={uploadTrigger}
+                      allProcessed={allProcessed}
+                      setAllProcessed={setAllProcessed}
+                    />
                   </Card.Body>
                 </Card>
               </Col>
@@ -215,7 +229,10 @@ const AppView = () => {
                 <Card
                   className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
                   <Card.Body>
-                    <FileNameList fileNames={fileNames} onDeleteSuccess={handleDeleteSuccess}/>
+                    <FileNameList
+                      fileNames={fileNames}
+                      onDeleteSuccess={handleDeleteSuccess}
+                    />
                   </Card.Body>
                 </Card>
               </Col>

@@ -1,17 +1,23 @@
 import axios from "axios";
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import objectHash from "object-hash";
+import Styles from "../../styles/dummyboxes/DummyTable.module.css";
 
-export default function TradeUploadList({ trigger }) {
+export default function TradeUploadList({
+  trigger,
+  allProcessed,
+  setAllProcessed,
+}) {
   const [csvTrades, setCsvTrades] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  // const [allProcessed, setAllProcessed] = useState(false); // New state to check if all trades are processed
 
   const previousTradesHashRef = useRef(""); // Stores hash of the previous trades
   const unchangedCounterRef = useRef(0); // Tracks how many times no change has occurred
   const maxUnchangedChecks = 1; // Stop polling after 5 unchanged intervals
-  const pollingInterval = 60000; // Poll every 10 seconds
+  const pollingInterval = 10000; // Poll every 60 seconds
 
   const tradesPerPage = 10;
 
@@ -43,7 +49,7 @@ export default function TradeUploadList({ trigger }) {
           }
         );
 
-        const ownerId = 1; 
+        const ownerId = 1;
         if (!ownerId) return;
 
         const filteredTrades = response.data.results.filter(
@@ -66,27 +72,43 @@ export default function TradeUploadList({ trigger }) {
         const totalTrades = response.data.count;
         setTotalPages(Math.ceil(totalTrades / tradesPerPage));
         setCurrentPage(page);
+
+        // Check if all trades are processed
+        const allProcessed = filteredTrades.every(
+          (trade) => trade.is_processed
+        );
+        setAllProcessed(allProcessed); // Set the flag
       } catch (error) {
         console.error("Error fetching trades:", error);
       } finally {
         setIsLoading(false);
       }
     },
-    [tradesPerPage]
+    [setAllProcessed, tradesPerPage]
   );
 
+  // Poll every `pollingInterval` to check if all trades are processed
   useEffect(() => {
-    fetchCsvTrades(currentPage); // Initial fetch
-
-    // Set up the polling interval
     const intervalId = setInterval(() => {
-      if (unchangedCounterRef.current < maxUnchangedChecks) {
-        fetchCsvTrades(currentPage);
+      if (!allProcessed) {
+        console.log("Polling: all trades not processed yet, fetching again...");
+        fetchCsvTrades(currentPage); // Refetch trades if all are not processed
       }
     }, pollingInterval);
 
-    return () => clearInterval(intervalId); // Clean up interval on unmount
-  }, [fetchCsvTrades, currentPage, trigger]);
+    return () => clearInterval(intervalId); // Cleanup interval on unmount
+  }, [allProcessed, fetchCsvTrades, currentPage]);
+
+  // Initial fetch and monitor for changes
+  useEffect(() => {
+    fetchCsvTrades(currentPage); // Initial fetch
+
+    // Only refetch if all trades are not processed
+    if (!allProcessed) {
+      console.log("Not all trades processed, refetching...");
+      fetchCsvTrades(currentPage);
+    }
+  }, [fetchCsvTrades, currentPage, trigger, allProcessed]);
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {
@@ -108,15 +130,83 @@ export default function TradeUploadList({ trigger }) {
     return currentTrade[field] !== previousTrade[field];
   };
 
+  // Dummy loading rows for the table
+  const renderLoadingRows = () => {
+    return Array.from({ length: 10 }, (_, index) => (
+      <tr key={index} style={{ opacity: 0.5 }}>
+        <td>
+          <div className={Styles.Placeholder} />
+        </td>
+        <td>
+          <div className={Styles.Placeholder} />
+        </td>
+        <td>
+          <div className={Styles.Placeholder} />
+        </td>
+        <td>
+          <div className={Styles.Placeholder} />
+        </td>
+        <td>
+          <div className={Styles.Placeholder} />
+        </td>
+        <td>
+          <div className={Styles.Placeholder} />
+        </td>
+        <td>
+          <div className={Styles.Placeholder} />
+        </td>
+        <td>
+          <div className={Styles.Placeholder} />
+        </td>
+        <td>
+          <div className={Styles.Placeholder} />
+        </td>
+        <td>
+          <div className={Styles.Placeholder} />
+        </td>
+        <td>
+          <div className={Styles.Placeholder} />
+        </td>
+      </tr>
+    ));
+  };
+
+  // Dummy loading header blocks
+const renderLoadingHeader = () => {
+  return (
+    <tr className={Styles.Header}>
+      <th><div className={`${Styles.Header} ${Styles.Short}`} /></th>
+      <th><div className={`${Styles.Header} ${Styles.Medium}`} /></th>
+      <th><div className={Styles.Header} /></th>
+      <th><div className={`${Styles.Header} ${Styles.Short}`} /></th>
+      <th><div className={`${Styles.Header} ${Styles.Medium}`} /></th>
+      <th><div className={Styles.Header} /></th>
+      <th><div className={`${Styles.Header} ${Styles.Short}`} /></th>
+      <th><div className={`${Styles.Header} ${Styles.Medium}`} /></th>
+      <th><div className={Styles.Header} /></th>
+      <th><div className={`${Styles.Header} ${Styles.Short}`} /></th>
+      <th><div className={`${Styles.Header} ${Styles.Medium}`} /></th>
+    </tr>
+  );
+};
+
   return (
     <>
       {isLoading ? (
-        <p>Loading...</p>
+        <div className="table-responsive">
+          <table className="table table-sm text-sm table-borderless">
+            <thead>{renderLoadingHeader()}</thead>
+            <tbody>{renderLoadingRows()}</tbody>
+          </table>
+        </div>
       ) : csvTrades.length > 0 ? (
         <div className="table-responsive">
+          {/* Show message if trades are not fully processed */}
+          {!allProcessed && <p>Trade matching in progress...</p>}
+
           <table className="table table-sm text-sm table-borderless table-hover">
-            <thead>
-              <tr>
+            <thead className="rounded">
+              <tr className={`${Styles.Header} text-muted`}>
                 <th>ID</th>
                 <th>Date</th>
                 <th>Asset</th>
@@ -145,22 +235,32 @@ export default function TradeUploadList({ trigger }) {
                     <td>{trade.leverage}</td>
                     <td>{trade.pnl_formatted}</td>
                     <td>{trade.pnl_percentage_formatted}</td>
-                    
+
                     {/* Render Open column conditionally */}
                     <td
                       style={{
-                        backgroundColor: hasFieldChanged("is_open", trade, prevTrade) ? "#d4edda" : "transparent",
-                      }}
-                    >
+                        backgroundColor: hasFieldChanged(
+                          "is_open",
+                          trade,
+                          prevTrade
+                        )
+                          ? "transparent"
+                          : "transparent",
+                      }}>
                       {trade.is_open ? "Yes" : "No"}
                     </td>
 
                     {/* Render Match column conditionally */}
                     <td
                       style={{
-                        backgroundColor: hasFieldChanged("is_matched", trade, prevTrade) ? "#d4edda" : "transparent",
-                      }}
-                    >
+                        backgroundColor: hasFieldChanged(
+                          "is_matched",
+                          trade,
+                          prevTrade
+                        )
+                          ? "transparent"
+                          : "transparent",
+                      }}>
                       {trade.is_matched ? "Yes" : "No"}
                     </td>
                   </tr>
@@ -173,8 +273,7 @@ export default function TradeUploadList({ trigger }) {
             <button
               className="btn btn-sm btn-primary"
               onClick={goToPreviousPage}
-              disabled={currentPage === 1}
-            >
+              disabled={currentPage === 1}>
               Previous
             </button>
 
@@ -185,14 +284,18 @@ export default function TradeUploadList({ trigger }) {
             <button
               className="btn btn-sm btn-primary"
               onClick={goToNextPage}
-              disabled={currentPage === totalPages}
-            >
+              disabled={currentPage === totalPages}>
               Next
             </button>
           </div>
         </div>
       ) : (
-        <p>No trades found.</p>
+        <div className="table-responsive">
+          <table className="table table-sm text-sm table-borderless">
+            <thead>{renderLoadingHeader()}</thead>
+            <tbody>{renderLoadingRows()}</tbody>
+          </table>
+        </div>
       )}
     </>
   );

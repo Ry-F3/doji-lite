@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
 
-export default function TradeUploadButton({ onUploadSuccess }) {
+export default function TradeUploadButton({ onUploadSuccess, isMatchingInProgress }) {
   const [file, setFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState("");
   const [loading, setLoading] = useState(false);
@@ -91,45 +91,50 @@ export default function TradeUploadButton({ onUploadSuccess }) {
   };
 
   return (
-    <div className="container mt-3">
-      <form onSubmit={handleUpload}>
+    <div className="d-flex flex-column h-100 w-100"> {/* Full height and width container */}
+      <form onSubmit={handleUpload} className="w-100 h-100">
         <input
           type="file"
           ref={fileInputRef}
           style={{ display: "none" }}
           onChange={handleFileChange}
         />
-
+  
         {!file ? (
           <button
-            className="btn btn-primary mb-2"
+            className="btn btn-primary w-100 h-100" // Full width and height
             type="button"
-            onClick={handleButtonClick}>
+            disabled={isMatchingInProgress}
+            onClick={handleButtonClick}
+          >
             Choose CSV File
           </button>
         ) : (
-          <div>
+          <div className="d-flex flex-column w-100 h-100">
             <button
               type="submit"
-              className="btn btn-success mb-2"
-              disabled={!file || loading}>
+              className="btn btn-success w-100 h-100" // Full width and height
+              disabled={!file || loading || isMatchingInProgress}
+            >
               {loading ? "Uploading..." : "Upload CSV"}
             </button>
-
-            <div className="d-flex align-items-center">
-              <p className="mb-0 flex-grow-1">{file.name}</p>
+  
+            <div className="d-flex align-items-center bg-sucess mt-1"> {/* Add margin for separation */}
+              <p className="mb-1 flex-grow-1">{file.name}</p>
               <button
                 onClick={handleFileClearClick}
                 type="button"
-                className="btn btn-transparent btn-sm">
+                className="btn btn-transparent btn-sm"
+              >
                 x
               </button>
             </div>
           </div>
         )}
       </form>
-
+  
       {uploadStatus && <p>{uploadStatus}</p>}
     </div>
   );
+  
 }
