@@ -15,7 +15,7 @@ import axios from "axios";
 import { useHistory } from "react-router-dom";
 
 export default function Nav({ openNav, onCloseNav }) {
-  const pathname = usePathname();
+  // const pathname = usePathname();
   const isLgUp = useResponsive("up", "lg");
   const currentUser = useCurrentUser(); // Get current user context
   const setCurrentUser = useSetCurrentUser();
@@ -103,6 +103,7 @@ function NavItem({ item }) {
         borderRadius: 1,
         typography: "body2",
         color: active ? "white.main" : "text.secondary",
+        fontSize: "18px", 
         bgcolor: active ? "action.selected" : "transparent",
         "&:hover": {
           bgcolor: active ? "action.hover" : "transparent",

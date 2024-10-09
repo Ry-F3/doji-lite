@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 import { Container, Row, Col, Card, ListGroup } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import NavBar from "../../components/NavBar";
@@ -24,17 +25,38 @@ const SkeletonLoader = ({ width, height }) => (
 const AppView = () => {
   const [loading, setLoading] = useState(true);
   const [uploadTrigger, setUploadTrigger] = useState(false);
+  const [fileNames, setFileNames] = useState([]); // State for file names
+  const [isLoadingFiles, setIsLoadingFiles] = useState(false);
+
+  const fetchFileNames = async () => {
+    setIsLoadingFiles(true);
+    try {
+      const response = await axios.get('filenames/');
+      if (Array.isArray(response.data.results)) {
+        setFileNames(response.data.results);
+      } else {
+        console.error('Expected an array but got:', response.data.results);
+      }
+    } catch (error) {
+      console.error('Error fetching file names:', error);
+    } finally {
+      setIsLoadingFiles(false);
+    }
+  };
 
   const handleUploadSuccess = () => {
     setUploadTrigger(prev => !prev); // Toggle the state to trigger refresh
+    fetchFileNames();
   };
 
   const handleDeleteSuccess = () => {
     setUploadTrigger(prev => !prev); // Toggle the state to trigger refresh
+    fetchFileNames();
   };
 
   useEffect(() => {
     // Simulate data loading
+    fetchFileNames(); 
     setTimeout(() => {
       setLoading(false);
     }, 500); // Replace with actual data fetching logic
@@ -193,7 +215,7 @@ const AppView = () => {
                 <Card
                   className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
                   <Card.Body>
-                    <FileNameList/>
+                    <FileNameList fileNames={fileNames} onDeleteSuccess={handleDeleteSuccess}/>
                   </Card.Body>
                 </Card>
               </Col>

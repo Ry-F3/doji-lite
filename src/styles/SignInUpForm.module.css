@@ -5,8 +5,9 @@
   background: transparent;
   box-sizing: border-box;
   text-align: center;
-  padding: 15px !important;
+  padding: 25px !important;
   font-size: 18px !important;
+ 
 }
 
 /* .InputProps {
@@ -22,24 +23,26 @@
 
 .Header {
   font-style: normal;
-  font-weight: bold;
-  font-size: 20px;
-  line-height: 19px;
+  font-weight: 800 !important;
+  font-size: 32px;
+  line-height: 35px;
   text-align: center;
   letter-spacing: 0.1em;
-  text-transform: uppercase;
+  text-transform: capitalize;
   color: #5d5e61;
+  font-family: 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
 }
 
 .Header2 {
   font-style: normal;
   font-weight: bold;
-  font-size: 13px;
+  font-size: 19px;
   line-height: 19px;
   text-align: center;
   letter-spacing: 0.15em;
-  text-transform: uppercase;
+  text-transform: capitalize;
   color: #8e9199;
+  font-family: 'Roboto', 'Helvetica Neue', 'Arial', sans-serif !important;
 }
 
 .Link {

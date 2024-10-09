@@ -1,58 +1,58 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const FileNameList = () => {
-    const [fileNames, setFileNames] = useState([]);
+const FileNameList = ({ fileNames, onDeleteSuccess, isLoading }) => {
     const [deleting, setDeleting] = useState({}); // Track which files are being deleted
 
-    const fetchFileNames = async () => {
-        try {
-            const response = await axios.get('filenames/');
-            console.log('Response Status:', response.status);
-            console.log('Response Data:', response.data); // Log the response data
-
-            if (Array.isArray(response.data.results)) {
-                setFileNames(response.data.results);
-            } else {
-                console.error('Expected an array but got:', response.data.results);
-            }
-        } catch (error) {
-            console.error('Error fetching file names:', error);
-        }
-    };
+    // Log the filenames prop whenever it changes
+    useEffect(() => {
+        console.log('File names prop changed:', fileNames);
+    }, [fileNames]); // Dependency array to run effect when fileNames changes
 
     const handleDelete = async (id, retries = 3) => {
         // Optimistic UI: remove the file from the list before confirming
-        setFileNames(fileNames.filter(fileName => fileName.id !== id));
         setDeleting({ ...deleting, [id]: true });
 
         try {
-            await axios.delete(`filenames/delete/${id}/`); // Adjust the endpoint based on API structure
+            await axios.delete(`filenames/delete/${id}`); // Adjust the endpoint based on API structure
             console.log(`File with ID ${id} deleted successfully.`);
-            // Optionally: show a success message or perform further UI updates
+
+            // Call the onDeleteSuccess callback if provided
+            if (onDeleteSuccess) {
+                onDeleteSuccess(); // This will refresh the data in the parent component
+            }
         } catch (error) {
             console.error(`Error deleting file with ID ${id}:`, error);
-
+    
             if (retries > 0) {
                 console.log(`Retrying deletion for file ID ${id} (${retries} retries left)...`);
-                handleDelete(id, retries - 1);
+                // Optional: wait before retrying
+                await new Promise(resolve => setTimeout(resolve, 1000)); // wait for 1 second before retrying
+                handleDelete(id, retries - 1); // Retry
             } else {
-                console.error(`Failed to delete file with ID ${id} after retries.`);
-                // Restore the file in the UI if deletion fails
-                fetchFileNames();
+                // Handle the error after all retries failed
+                if (error.response) {
+                    console.error('Response data:', error.response.data);
+                    console.error('Response status:', error.response.status);
+                    console.error('Response headers:', error.response.headers);
+                    // Notify the user about the failure
+                    alert(`Failed to delete file with ID ${id}: ${error.response.data.message || 'Unknown error'}`);
+                } else {
+                    console.error(`Failed to delete file with ID ${id} after retries.`);
+                    alert(`Failed to delete file with ID ${id}. Please try again later.`);
+                }
             }
         } finally {
-            setDeleting({ ...deleting, [id]: false });
+            // Ensure the deleting state is reset regardless of success or failure
+            setDeleting((prev) => ({ ...prev, [id]: false }));
         }
     };
 
-    useEffect(() => {
-        fetchFileNames();
-    }, []);
-
     return (
         <div>
-            {fileNames.length === 0 ? (
+            {isLoading ? (
+                <p>Loading files...</p>
+            ) : fileNames.length === 0 ? (
                 <p>No files found.</p>
             ) : (
                 fileNames.map((fileName) => (

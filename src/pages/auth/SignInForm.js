@@ -53,7 +53,7 @@ function SignInForm() {
     <Row className={`d-flex justify-content-center align-items-center ${styles.Row}`}>
       <Col className="my-auto p-0 p-md-2" md={5}>
         <Container className={`${appStyles.Content} p-4 `}>
-          <h1 className={styles.Header}>sign in</h1>
+          <h1 className={`${styles.Header} p-3`}>sign in</h1>
           <Form onSubmit={handleSubmit}>
             <Form.Group controlId="username">
               <Form.Label className="d-none">Username</Form.Label>

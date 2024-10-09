@@ -49,10 +49,10 @@ const SignUpForm = () => {
     <Row className={`d-flex justify-content-center align-items-start ${styles.Row}`}>
       <Col className="my-auto py-2 p-md-2" md={5}>
         <Container className={`${appStyles.Content} p-4 `}>
-          <h1 className={`${styles.Header} p-1`}>Welcome to Doji-Lite Trading Journal</h1>
-          <h2 className={`${styles.Header2} p-3`}>We help traders fight back!</h2>
+          <h1 className={`${styles.Header} p-1`}>Welcome to Doji-Lite Trading</h1>
+          <h2 className={`${styles.Header2} p-4`}>We help traders fight back!</h2>
 
-          <Form onSubmit={`${handleSubmit} p-3`}>
+          <Form onSubmit={`${handleSubmit}`}>
             <Form.Group controlId="username" className={`${styles.InputPorps}`}>
               <Form.Label className="d-none">username</Form.Label>
               <Form.Control

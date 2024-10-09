@@ -1,87 +1,117 @@
 import axios from "axios";
-import React, { useCallback, useEffect, useState } from "react";
-// import { useProfileData } from "../../contexts/ProfileDataContext";
+import React, { useCallback, useEffect, useState, useRef } from "react";
+import objectHash from "object-hash";
 
 export default function TradeUploadList({ trigger }) {
   const [csvTrades, setCsvTrades] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  // const profileData = useProfileData(); // Use hook to get profile data
+
+  const previousTradesHashRef = useRef(""); // Stores hash of the previous trades
+  const unchangedCounterRef = useRef(0); // Tracks how many times no change has occurred
+  const maxUnchangedChecks = 1; // Stop polling after 5 unchanged intervals
+  const pollingInterval = 60000; // Poll every 10 seconds
+
+  const tradesPerPage = 10;
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const options = { year: "numeric", month: "short", day: "2-digit" };
-    return date.toLocaleDateString("en-US", options).replace(",", ""); // Remove comma for formatting
+    return date.toLocaleDateString("en-US", options).replace(",", "");
   };
 
-  const tradesPerPage = 10; // Number of trades per page
+  const haveTradesChanged = (oldTradesHash, newTrades) => {
+    const newTradesHash = objectHash(newTrades);
 
-  // Fetch CSV Trades based on the current page
+    if (oldTradesHash !== newTradesHash) {
+      console.log("Trades have changed.");
+      return true;
+    }
+    console.log("No trade changes detected.");
+    return false;
+  };
+
   const fetchCsvTrades = useCallback(
     async (page) => {
-      setIsLoading(true); // Start loading
+      setIsLoading(true);
       try {
-        // Fetch trades from the server
         const response = await axios.get(
           `trades-csv/?page=${page}&search=royal90s`,
           {
-            withCredentials: true, // Ensure cookies or tokens are sent along with the request
+            withCredentials: true,
           }
         );
 
-        const ownerId = 1; // Assuming you have a static ownerId for now
-        if (!ownerId) return; // Exit if ownerId is not available
+        const ownerId = 1; 
+        if (!ownerId) return;
 
-        // Filter trades for the specific owner
         const filteredTrades = response.data.results.filter(
           (trade) => trade.owner === ownerId
         );
 
-        // Log the trades received from the server
-        console.log("Fetched trades from server:", response.data.results);
-        console.log("Filtered trades for owner:", filteredTrades);
+        // Compare current trades with previous trades hash
+        if (haveTradesChanged(previousTradesHashRef.current, filteredTrades)) {
+          setCsvTrades(filteredTrades);
+          previousTradesHashRef.current = objectHash(filteredTrades); // Update the hash reference
+          unchangedCounterRef.current = 0; // Reset the unchanged counter if trades have changed
+        } else {
+          unchangedCounterRef.current++; // Increment the unchanged counter
+          if (unchangedCounterRef.current >= maxUnchangedChecks) {
+            console.log("Stopping polling after repeated unchanged checks.");
+            return; // Exit the fetch early if no changes have been detected
+          }
+        }
 
-        setCsvTrades(filteredTrades);
-
-        // Calculate total pages
-        const totalTrades = response.data.count; // Total trades count
+        const totalTrades = response.data.count;
         setTotalPages(Math.ceil(totalTrades / tradesPerPage));
-        setCurrentPage(page); // Update current page
+        setCurrentPage(page);
       } catch (error) {
         console.error("Error fetching trades:", error);
       } finally {
-        setIsLoading(false); // Stop loading
+        setIsLoading(false);
       }
     },
     [tradesPerPage]
   );
 
   useEffect(() => {
-    fetchCsvTrades(currentPage);
+    fetchCsvTrades(currentPage); // Initial fetch
+
+    // Set up the polling interval
+    const intervalId = setInterval(() => {
+      if (unchangedCounterRef.current < maxUnchangedChecks) {
+        fetchCsvTrades(currentPage);
+      }
+    }, pollingInterval);
+
+    return () => clearInterval(intervalId); // Clean up interval on unmount
   }, [fetchCsvTrades, currentPage, trigger]);
 
-  // Pagination control functions
   const goToNextPage = () => {
     if (currentPage < totalPages) {
       const nextPage = currentPage + 1;
-      setCurrentPage(nextPage); // Set page to the next one
-      fetchCsvTrades(nextPage); // Pass the nextPage value
+      setCurrentPage(nextPage);
+      fetchCsvTrades(nextPage);
     }
   };
 
   const goToPreviousPage = () => {
     if (currentPage > 1) {
       const prevPage = currentPage - 1;
-      setCurrentPage(prevPage); // Set page to the previous one
-      fetchCsvTrades(prevPage); // Pass the prevPage value
+      setCurrentPage(prevPage);
+      fetchCsvTrades(prevPage);
     }
+  };
+
+  const hasFieldChanged = (field, currentTrade, previousTrade) => {
+    return currentTrade[field] !== previousTrade[field];
   };
 
   return (
     <>
       {isLoading ? (
-        <p>Loading...</p> // Show loading spinner or message
+        <p>Loading...</p>
       ) : csvTrades.length > 0 ? (
         <div className="table-responsive">
           <table className="table table-sm text-sm table-borderless table-hover">
@@ -102,10 +132,10 @@ export default function TradeUploadList({ trigger }) {
             </thead>
             <tbody>
               {csvTrades.map((trade, index) => {
-                // Log each trade being rendered
-                console.log(`Rendering trade at index ${index}:`, trade);
+                const prevTrade = previousTradesHashRef.current[index] || {};
+
                 return (
-                  <tr key={index}>
+                  <tr key={trade.id}>
                     <td>{trade.id}</td>
                     <td>{formatDate(trade.order_time)}</td>
                     <td>{trade.underlying_asset}</td>
@@ -115,20 +145,35 @@ export default function TradeUploadList({ trigger }) {
                     <td>{trade.leverage}</td>
                     <td>{trade.pnl_formatted}</td>
                     <td>{trade.pnl_percentage_formatted}</td>
-                    <td>{trade.is_open ? "Yes" : "No"}</td>
-                    <td>{trade.is_matched ? "Yes" : "No"}</td>
+                    
+                    {/* Render Open column conditionally */}
+                    <td
+                      style={{
+                        backgroundColor: hasFieldChanged("is_open", trade, prevTrade) ? "#d4edda" : "transparent",
+                      }}
+                    >
+                      {trade.is_open ? "Yes" : "No"}
+                    </td>
+
+                    {/* Render Match column conditionally */}
+                    <td
+                      style={{
+                        backgroundColor: hasFieldChanged("is_matched", trade, prevTrade) ? "#d4edda" : "transparent",
+                      }}
+                    >
+                      {trade.is_matched ? "Yes" : "No"}
+                    </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
 
-          {/* Pagination Controls */}
           <div className="d-flex justify-content-between mt-3">
             <button
               className="btn btn-sm btn-primary"
               onClick={goToPreviousPage}
-              disabled={currentPage === 1} // Disable if on the first page
+              disabled={currentPage === 1}
             >
               Previous
             </button>
@@ -140,7 +185,7 @@ export default function TradeUploadList({ trigger }) {
             <button
               className="btn btn-sm btn-primary"
               onClick={goToNextPage}
-              disabled={currentPage === totalPages} // Disable if on the last page
+              disabled={currentPage === totalPages}
             >
               Next
             </button>
