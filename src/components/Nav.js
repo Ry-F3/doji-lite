@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
@@ -21,7 +21,7 @@ export default function Nav({ openNav, onCloseNav }) {
   const setCurrentUser = useSetCurrentUser();
   const history = useHistory();
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     console.log("Sign out initiated");
     try {
       await axios.post("dj-rest-auth/logout/");
@@ -32,7 +32,7 @@ export default function Nav({ openNav, onCloseNav }) {
     } catch (err) {
       console.log("Error during sign-out:", err);
     }
-  };
+  },[setCurrentUser, history]);
 
   const navConfig = useMemo(() => {
     return currentUser

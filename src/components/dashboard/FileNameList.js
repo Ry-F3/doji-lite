@@ -1,74 +1,118 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { Table, Button, Spinner } from "react-bootstrap";
+import utilsStyle from "../../styles/utils/utils.module.css";
+import axios from "axios";
 
 const FileNameList = ({ fileNames, onDeleteSuccess, isLoading }) => {
-    const [deleting, setDeleting] = useState({}); // Track which files are being deleted
+  const [deleting, setDeleting] = useState({}); // Track which files are being deleted
 
-    // Log the filenames prop whenever it changes
-    useEffect(() => {
-        console.log('File names prop changed:', fileNames);
-    }, [fileNames]); // Dependency array to run effect when fileNames changes
+  // Log the filenames prop whenever it changes
+  useEffect(() => {
+    console.log("File names prop changed:", fileNames);
+  }, [fileNames]); // Dependency array to run effect when fileNames changes
 
-    const handleDelete = async (id, retries = 3) => {
-        // Optimistic UI: remove the file from the list before confirming
-        setDeleting({ ...deleting, [id]: true });
+  const handleDelete = async (id, retries = 3) => {
+    setDeleting({ ...deleting, [id]: true });
 
-        try {
-            await axios.delete(`filenames/delete/${id}`); // Adjust the endpoint based on API structure
-            console.log(`File with ID ${id} deleted successfully.`);
+    try {
+      await axios.delete(`filenames/delete/${id}`);
+      console.log(`File with ID ${id} deleted successfully.`);
 
-            // Call the onDeleteSuccess callback if provided
-            if (onDeleteSuccess) {
-                onDeleteSuccess(); // This will refresh the data in the parent component
-            }
-        } catch (error) {
-            console.error(`Error deleting file with ID ${id}:`, error);
-    
-            if (retries > 0) {
-                console.log(`Retrying deletion for file ID ${id} (${retries} retries left)...`);
-                // Optional: wait before retrying
-                await new Promise(resolve => setTimeout(resolve, 1000)); // wait for 1 second before retrying
-                handleDelete(id, retries - 1); // Retry
-            } else {
-                // Handle the error after all retries failed
-                if (error.response) {
-                    console.error('Response data:', error.response.data);
-                    console.error('Response status:', error.response.status);
-                    console.error('Response headers:', error.response.headers);
-                    // Notify the user about the failure
-                    alert(`Failed to delete file with ID ${id}: ${error.response.data.message || 'Unknown error'}`);
-                } else {
-                    console.error(`Failed to delete file with ID ${id} after retries.`);
-                    alert(`Failed to delete file with ID ${id}. Please try again later.`);
-                }
-            }
-        } finally {
-            // Ensure the deleting state is reset regardless of success or failure
-            setDeleting((prev) => ({ ...prev, [id]: false }));
+      if (onDeleteSuccess) {
+        onDeleteSuccess();
+      }
+    } catch (error) {
+      console.error(`Error deleting file with ID ${id}:`, error);
+      if (retries > 0) {
+        console.log(
+          `Retrying deletion for file ID ${id} (${retries} retries left)...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        handleDelete(id, retries - 1);
+      } else {
+        if (error.response) {
+          alert(
+            `Failed to delete file with ID ${id}: ${
+              error.response.data.message || "Unknown error"
+            }`
+          );
+        } else {
+          alert(`Failed to delete file with ID ${id}. Please try again later.`);
         }
-    };
+      }
+    } finally {
+      setDeleting((prev) => ({ ...prev, [id]: false }));
+    }
+  };
 
-    return (
-        <div>
-            {isLoading ? (
-                <p>Loading files...</p>
-            ) : fileNames.length === 0 ? (
-                <p>No files found.</p>
-            ) : (
-                fileNames.map((fileName) => (
-                    <div key={fileName.id}>
-                        {fileName.file_name} 
-                        <button 
-                            onClick={() => handleDelete(fileName.id)} 
-                            disabled={deleting[fileName.id]}
-                        >
-                            {deleting[fileName.id] ? 'Deleting...' : 'Delete'}
-                        </button>
-                    </div>
-                ))
-            )}
-        </div>
-    );
+  // Fill the table with exactly 10 rows, even if some rows are empty
+  const filledFileNames = [...fileNames];
+  while (filledFileNames.length < 10) {
+    filledFileNames.push({
+      id: `empty-${filledFileNames.length}`,
+      file_name: "",
+    });
+  }
+
+  return (
+    <div className="table-responsive-sm">
+      <Table striped hover size="sm" className="table-sm table-borderless">
+        {" "}
+        {/* Smaller table without borders */}
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>File Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filledFileNames.map((fileName, index) => (
+            <tr key={fileName.id}>
+              <td className="p-2">{index + 1}</td>
+              <td className="align-middle p-2">
+                <span className={utilsStyle.truncateFade}>
+                  {fileName.file_name || "—"}
+                </span>
+              </td>
+              <td>
+                {fileName.file_name && (
+                  <Button
+                    onClick={() => handleDelete(fileName.id)}
+                    disabled={deleting[fileName.id]}
+                    size="sm"
+                    style={{
+                      backgroundColor: "transparent",
+                      border: "none",
+                      padding: 0,
+                    }} // Transparent button
+                  >
+                    {deleting[fileName.id] ? (
+                      <>
+                        <Spinner
+                          as="span"
+                          animation="border"
+                          size="sm"
+                          role="status"
+                          aria-hidden="true"
+                          variant="primary"
+                        />{" "}
+                        ...
+                      </>
+                    ) : (
+                      <i
+                        className="fa-solid fa-trash-can"
+                        style={{ fontSize: "1.2rem" }}></i>
+                    )}
+                  </Button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </div>
+  );
 };
 
 export default FileNameList;

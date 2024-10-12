@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState, useRef } from "react";
 import objectHash from "object-hash";
 import Styles from "../../styles/dummyboxes/DummyTable.module.css";
 
+
 export default function TradeUploadList({
   trigger,
   allProcessed,
@@ -23,7 +24,7 @@ export default function TradeUploadList({
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const options = { year: "numeric", month: "short", day: "2-digit" };
+    const options = { month: "short", day: "2-digit" };
     return date.toLocaleDateString("en-US", options).replace(",", "");
   };
 
@@ -38,53 +39,97 @@ export default function TradeUploadList({
     return false;
   };
 
+  const handleTradesResponse = useCallback((response, ownerId) => {
+    if (!ownerId) return;
+
+    const filteredTrades = response.data.results.filter(
+      (trade) => trade.owner === ownerId
+    );
+
+    // Compare current trades with previous trades hash
+    if (haveTradesChanged(previousTradesHashRef.current, filteredTrades)) {
+      setCsvTrades(filteredTrades);
+      previousTradesHashRef.current = objectHash(filteredTrades); // Update the hash reference
+      unchangedCounterRef.current = 0; // Reset unchanged counter if trades changed
+    } else {
+      unchangedCounterRef.current++; // Increment unchanged counter
+      if (unchangedCounterRef.current >= maxUnchangedChecks) {
+        console.log("Stopping polling after repeated unchanged checks.");
+        return; // Exit the fetch early if no changes have been detected
+      }
+    }
+
+    const totalTrades = response.data.count;
+    setTotalPages(Math.ceil(totalTrades / tradesPerPage));
+
+    // Check if all trades are processed
+    const allProcessed = filteredTrades.every((trade) => trade.is_processed);
+    setAllProcessed(allProcessed); // Set the flag
+  }, []);
+
+  const refreshTokenAndRetry = async (originalRequest) => {
+    try {
+      const refreshResponse = await axios.post(
+        "/dj-rest-auth/token/refresh/",
+        null,
+        {
+          withCredentials: true,
+        }
+      );
+
+      // Attach new token to the retry request
+      originalRequest.headers[
+        "Authorization"
+      ] = `Bearer ${refreshResponse.data.access}`;
+
+      return axios(originalRequest); // Retry the request
+    } catch (error) {
+      console.error("Token refresh failed, redirecting to login...", error);
+      window.location.href = "/signin";
+      throw error;
+    }
+  };
+
   const fetchCsvTrades = useCallback(
     async (page) => {
       setIsLoading(true);
+  
+      const ownerId = 1; // Adjust if you need a dynamic ownerId
+      const requestConfig = {
+        method: "get",
+        url: `trades-csv/?page=${page}&search=royal90s`,
+        withCredentials: true,
+      };
+  
       try {
-        const response = await axios.get(
-          `trades-csv/?page=${page}&search=royal90s`,
-          {
-            withCredentials: true,
-          }
-        );
-
-        const ownerId = 1;
-        if (!ownerId) return;
-
-        const filteredTrades = response.data.results.filter(
-          (trade) => trade.owner === ownerId
-        );
-
-        // Compare current trades with previous trades hash
-        if (haveTradesChanged(previousTradesHashRef.current, filteredTrades)) {
-          setCsvTrades(filteredTrades);
-          previousTradesHashRef.current = objectHash(filteredTrades); // Update the hash reference
-          unchangedCounterRef.current = 0; // Reset the unchanged counter if trades have changed
-        } else {
-          unchangedCounterRef.current++; // Increment the unchanged counter
-          if (unchangedCounterRef.current >= maxUnchangedChecks) {
-            console.log("Stopping polling after repeated unchanged checks.");
-            return; // Exit the fetch early if no changes have been detected
-          }
-        }
-
-        const totalTrades = response.data.count;
-        setTotalPages(Math.ceil(totalTrades / tradesPerPage));
-        setCurrentPage(page);
-
-        // Check if all trades are processed
-        const allProcessed = filteredTrades.every(
-          (trade) => trade.is_processed
-        );
-        setAllProcessed(allProcessed); // Set the flag
+        // Initial fetch of trades
+        let response = await axios(requestConfig);
+  
+        // Process the response data
+        handleTradesResponse(response, ownerId);
       } catch (error) {
-        console.error("Error fetching trades:", error);
+        if (error.response?.status === 401) {
+          console.error("Unauthorized, attempting to refresh token...");
+          try {
+            // Retry after refreshing token
+            let retryResponse = await refreshTokenAndRetry(error.config);
+  
+            // Process the retried response data
+            handleTradesResponse(retryResponse, ownerId);
+          } catch (retryError) {
+            console.error(
+              "Error retrying request after token refresh:",
+              retryError
+            );
+          }
+        } else {
+          console.error("Error fetching trades:", error);
+        }
       } finally {
         setIsLoading(false);
       }
     },
-    [setAllProcessed, tradesPerPage]
+    [handleTradesResponse] // Now handleTradesResponse is memoized, no warning should appear
   );
 
   // Poll every `pollingInterval` to check if all trades are processed
@@ -130,6 +175,35 @@ export default function TradeUploadList({
     return currentTrade[field] !== previousTrade[field];
   };
 
+  const calculateTotalPnl = () => {
+    let totalPositivePnl = 0;
+    let totalNegativePnl = 0;
+
+    csvTrades.forEach((trade) => {
+      const pnl = parseFloat(trade.pnl_formatted); // Parse the PnL value from the trade
+
+      if (!isNaN(pnl)) {
+        if (pnl > 0) {
+          totalPositivePnl += pnl; // Sum positive PnL values
+        } else if (pnl < 0) {
+          totalNegativePnl += pnl; // Sum negative PnL values
+        }
+      }
+    });
+
+    // Declare and calculate sum here
+    const sum = totalPositivePnl + totalNegativePnl; // Adjusted to totalNegativePnl as it can be a negative number
+
+    console.log(`Total Positive PnL: ${totalPositivePnl}`);
+    console.log(`Total Negative PnL: ${totalNegativePnl}`);
+    console.log(`Sum: ${sum}`);
+
+    return { totalPositivePnl, totalNegativePnl, sum };
+  };
+
+  // Call the function
+  calculateTotalPnl();
+
   // Dummy loading rows for the table
   const renderLoadingRows = () => {
     return Array.from({ length: 10 }, (_, index) => (
@@ -172,23 +246,45 @@ export default function TradeUploadList({
   };
 
   // Dummy loading header blocks
-const renderLoadingHeader = () => {
-  return (
-    <tr className={Styles.Header}>
-      <th><div className={`${Styles.Header} ${Styles.Short}`} /></th>
-      <th><div className={`${Styles.Header} ${Styles.Medium}`} /></th>
-      <th><div className={Styles.Header} /></th>
-      <th><div className={`${Styles.Header} ${Styles.Short}`} /></th>
-      <th><div className={`${Styles.Header} ${Styles.Medium}`} /></th>
-      <th><div className={Styles.Header} /></th>
-      <th><div className={`${Styles.Header} ${Styles.Short}`} /></th>
-      <th><div className={`${Styles.Header} ${Styles.Medium}`} /></th>
-      <th><div className={Styles.Header} /></th>
-      <th><div className={`${Styles.Header} ${Styles.Short}`} /></th>
-      <th><div className={`${Styles.Header} ${Styles.Medium}`} /></th>
-    </tr>
-  );
-};
+  const renderLoadingHeader = () => {
+    return (
+      <tr className={Styles.Header}>
+        <th>
+          <div className={`${Styles.Header} ${Styles.Short}`} />
+        </th>
+        <th>
+          <div className={`${Styles.Header} ${Styles.Medium}`} />
+        </th>
+        <th>
+          <div className={Styles.Header} />
+        </th>
+        <th>
+          <div className={`${Styles.Header} ${Styles.Short}`} />
+        </th>
+        <th>
+          <div className={`${Styles.Header} ${Styles.Medium}`} />
+        </th>
+        <th>
+          <div className={Styles.Header} />
+        </th>
+        <th>
+          <div className={`${Styles.Header} ${Styles.Short}`} />
+        </th>
+        <th>
+          <div className={`${Styles.Header} ${Styles.Medium}`} />
+        </th>
+        <th>
+          <div className={Styles.Header} />
+        </th>
+        <th>
+          <div className={`${Styles.Header} ${Styles.Short}`} />
+        </th>
+        <th>
+          <div className={`${Styles.Header} ${Styles.Medium}`} />
+        </th>
+      </tr>
+    );
+  };
 
   return (
     <>
@@ -202,7 +298,11 @@ const renderLoadingHeader = () => {
       ) : csvTrades.length > 0 ? (
         <div className="table-responsive">
           {/* Show message if trades are not fully processed */}
-          {!allProcessed && <p>Trade matching in progress...</p>}
+          {!allProcessed && (
+            <div className="alert alert-primary" role="alert">
+              <span className="fw-bold">Trade matching in progress...</span>
+            </div>
+          )}
 
           <table className="table table-sm text-sm table-borderless table-hover">
             <thead className="rounded">
@@ -269,23 +369,23 @@ const renderLoadingHeader = () => {
             </tbody>
           </table>
 
-          <div className="d-flex justify-content-between mt-3">
+          <div className="d-flex justify-content-center align-items-center mt-3">
             <button
-              className="btn btn-sm btn-primary"
+              className="btn btn-sm btn-primary me-2"
               onClick={goToPreviousPage}
               disabled={currentPage === 1}>
-              Previous
+              &lt;&lt;
             </button>
 
-            <span>
+            <span className="mx-3">
               Page {currentPage} of {totalPages}
             </span>
 
             <button
-              className="btn btn-sm btn-primary"
+              className="btn btn-sm btn-primary ms-2"
               onClick={goToNextPage}
               disabled={currentPage === totalPages}>
-              Next
+              &gt;&gt;
             </button>
           </div>
         </div>

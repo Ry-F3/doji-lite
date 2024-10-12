@@ -2,13 +2,17 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Container, Row, Col, Card, ListGroup } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import NavBar from "../../components/NavBar";
 import navBoxStyles from "../../styles/Layout.module.css";
+import utilStyles from "../../styles/utils/utils.module.css"
 // Components
 import TradeUploadButton from "../../components/dashboard/TradeUploadButton";
 import TradeUploadList from "../../components/dashboard/TradeUploadList";
-import DeleteAllTradesButton from "../../components/dashboard/TradeDeleteButton";
 import FileNameList from "../../components/dashboard/FileNameList";
+import SearchBar from "../../components/dashboard/SearchBar"
+import {
+  useCurrentUser,
+ 
+} from "../../contexts/CurrentUserContext"
 
 // Skeleton loader component
 const SkeletonLoader = ({ width, height }) => (
@@ -23,6 +27,8 @@ const SkeletonLoader = ({ width, height }) => (
 );
 
 const AppView = () => {
+  const currentUser = useCurrentUser();
+
   const [loading, setLoading] = useState(true);
   const [uploadTrigger, setUploadTrigger] = useState(false);
   const [fileNames, setFileNames] = useState([]); // State for file names
@@ -60,14 +66,14 @@ const AppView = () => {
     fetchFileNames();
     setTimeout(() => {
       setLoading(false);
-    }, 500); // Replace with actual data fetching logic
+    }, 500); 
   }, []);
 
   return (
     <>
-      <NavBar />
+      
       <Container fluid className="p-4">
-        <h4 className="mb-5">Hi, Welcome back 👋</h4>
+        <h4 className="mb-5">Hi, Welcome back {currentUser?.username} 👋</h4>
 
         <Row className="g-3 mb-4 mt-2">
           {loading ? (
@@ -159,21 +165,21 @@ const AppView = () => {
                 <Card
                   className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
                   <Card.Body>
-                    {/* <DeleteAllTradesButton onDeleteSuccess={handleDeleteSuccess}/> */}
+                    <SearchBar/>
                   </Card.Body>
                 </Card>
               </Col>
 
               <Col xs={12} md={6} lg={4}>
                 <Card
-                  className={`text-center shadow-sm border-0 rounded bg-light`}
-                  style={{ height: "100%" }} // Optional: ensure the card has a defined height
+                  className={`text-center shadow-sm border-0 rounded-3 bg-light`}
+                
                 >
                   <Card.Body className="d-flex p-0 h-100">
-                    {" "}
+               
                     {/* Flex and full height */}
                     <div style={{ flex: 1, width: "100%", height: "100%" }}>
-                      {" "}
+                  
                       {/* Container for the button */}
                       <TradeUploadButton
                         onUploadSuccess={handleUploadSuccess}
@@ -228,11 +234,17 @@ const AppView = () => {
               <Col xs={12} md={6} lg={4}>
                 <Card
                   className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
-                  <Card.Body>
-                    <FileNameList
-                      fileNames={fileNames}
-                      onDeleteSuccess={handleDeleteSuccess}
-                    />
+                  <Card.Body className={`p-2 overflow-auto ${utilStyles.bottomBar}`}>
+              
+                    {/* Added padding */}
+                    <div className="d-flex flex-column">
+                 
+                      {/* Ensures content stacks properly */}
+                      <FileNameList
+                        fileNames={fileNames}
+                        onDeleteSuccess={handleDeleteSuccess}
+                      />
+                    </div>
                   </Card.Body>
                 </Card>
               </Col>

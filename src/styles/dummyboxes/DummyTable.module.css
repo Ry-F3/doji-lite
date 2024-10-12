@@ -1,22 +1,23 @@
+/* General placeholder block */
 .Header {
     width: 100%;
     height: 1em;
     background: #f5f4f4; /* Light gray color */
-    border-radius: 2px !important; /* Optional: for rounded corners */
+    border-radius: 2px !important; /* Rounded corners */
     margin: 0.2em 0;
+  
 }
 
 /* Different sizes for placeholders */
 .Header.Short {
     width: 50%; /* Shorter block */
-     /* Height for the short block */
+    animation: pulse 1.5s infinite ease-in-out; /* Apply pulsing animation */
 }
 
 .Header.Medium {
     width: 80%; /* Medium block */
-     /* Height for the medium block */
+    animation: pulse 1.5s infinite ease-in-out; /* Apply pulsing animation */
 }
-
 
 .Placeholder {
     width: 100%;
@@ -24,4 +25,19 @@
     background: #e0e0e0; /* Light gray color */
     margin: 0.2em 0;
     border-radius: 4px; /* Optional: for rounded corners */
+    animation: pulse 1.5s infinite ease-in-out; /* Apply pulsing animation */
 }
+
+/* Keyframes for pulsing effect */
+@keyframes pulse {
+    0% {
+        background-color: #f5f4f4;
+    }
+    50% {
+        background-color: #e0e0e0; /* Darker gray at mid-point */
+    }
+    100% {
+        background-color: #f5f4f4;
+    }
+}
+
