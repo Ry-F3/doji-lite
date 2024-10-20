@@ -10,7 +10,7 @@ import TradeUploadList from "../../components/dashboard/TradeUploadList";
 import FileNameList from "../../components/dashboard/FileNameList";
 import SearchBar from "../../components/dashboard/SearchBar"
 import {
-  useCurrentUser,
+  useCurrentUser
  
 } from "../../contexts/CurrentUserContext"
 
@@ -70,8 +70,7 @@ const AppView = () => {
   }, []);
 
   return (
-    <>
-      
+    <> 
       <Container fluid className="p-4">
         <h4 className="mb-5">Hi, Welcome back {currentUser?.username} 👋</h4>
 
@@ -172,8 +171,8 @@ const AppView = () => {
 
               <Col xs={12} md={6} lg={4}>
                 <Card
-                  className={`text-center shadow-sm border-0 rounded-3 bg-light`}
-                
+                  className={`text-center shadow-sm border-0 rounded-3 bg-light mt-2`}
+                  style={{ height: "80%" }} 
                 >
                   <Card.Body className="d-flex p-0 h-100">
                
@@ -221,7 +220,6 @@ const AppView = () => {
                 <Card
                   className={`text-center shadow-sm border-0 rounded-3 ${navBoxStyles.BorderRadius}`}>
                   <Card.Body>
-                    {/* <Card.Title>News Update</Card.Title> */}
                     <TradeUploadList
                       trigger={uploadTrigger}
                       allProcessed={allProcessed}

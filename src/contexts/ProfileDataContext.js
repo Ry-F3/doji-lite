@@ -1,8 +1,7 @@
-import React from "react";
-
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 import { useCurrentUser } from "./CurrentUserContext";
-import { axiosReq } from "../api/axiosDefaults";
+import { keysToCamelCase } from "../utils/CamelCase";
 
 const ProfileDataContext = createContext();
 const SetProfileDataContext = createContext();
@@ -12,31 +11,32 @@ export const useSetProfileData = () => useContext(SetProfileDataContext);
 
 export const ProfileDataProvider = ({ children }) => {
   const [profileData, setProfileData] = useState(null);
-
   const currentUser = useCurrentUser();
 
   useEffect(() => {
-    const handleMount = async () => {
-      try {
-        const { data } = await axiosReq.get("/profiles/");
-        // Transform the API response to camelCase
-        const camelCaseData = data.map((profile) => ({
-          id: profile.id,
-          owner: profile.owner,
-          createdAt: profile.created_at,
-          updatedAt: profile.updated_at,
-          firstName: profile.first_name,
-          lastName: profile.last_name,
-          content: profile.content,
-          image: profile.image,
-          isOwner: profile.is_owner,
-        }));
-        setProfileData(camelCaseData);
-      } catch (err) {
-        console.error("Error fetching profile data", err);
+    const fetchProfileData = async () => {
+      if (currentUser) {
+        try {
+          // Fetch profile data using the current user's profile ID
+          const { data } = await axios.get(`/profiles/${currentUser?.pk}`);
+          
+          // Convert the data to camelCase using the utility function
+          const camelCasedData = keysToCamelCase(data);
+          
+          // Log the camelCased profile data
+          console.log("Fetched Profile Data (camelCased):", camelCasedData);
+          console.log("Current User:", currentUser)
+          setProfileData(camelCasedData);
+          
+        } catch (error) {
+          console.log(error);
+        }
       }
     };
-    handleMount();
+
+    if (currentUser) {
+      fetchProfileData();
+    }
   }, [currentUser]);
 
   return (

@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import objectHash from "object-hash";
 import Styles from "../../styles/dummyboxes/DummyTable.module.css";
+import {useCurrentUser} from "../../contexts/CurrentUserContext"
+import { useProfileData } from "../../contexts/ProfileDataContext";
 
 
 export default function TradeUploadList({
@@ -9,11 +11,12 @@ export default function TradeUploadList({
   allProcessed,
   setAllProcessed,
 }) {
+  const currentUser = useCurrentUser();
+  const profileUser = useProfileData();
   const [csvTrades, setCsvTrades] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  // const [allProcessed, setAllProcessed] = useState(false); // New state to check if all trades are processed
 
   const previousTradesHashRef = useRef(""); // Stores hash of the previous trades
   const unchangedCounterRef = useRef(0); // Tracks how many times no change has occurred
@@ -94,13 +97,13 @@ export default function TradeUploadList({
     async (page) => {
       setIsLoading(true);
   
-      const ownerId = 1; // Adjust if you need a dynamic ownerId
+      const ownerId = currentUser?.pk; // Adjust if you need a dynamic ownerId
       const requestConfig = {
         method: "get",
-        url: `trades-csv/?page=${page}&search=royal90s`,
+        url: `trades-csv/?page=${page}&search=${currentUser?.username}`,
         withCredentials: true,
       };
-  
+
       try {
         // Initial fetch of trades
         let response = await axios(requestConfig);
@@ -299,7 +302,7 @@ export default function TradeUploadList({
         <div className="table-responsive">
           {/* Show message if trades are not fully processed */}
           {!allProcessed && (
-            <div className="alert alert-primary" role="alert">
+            <div className="alert bg-light" role="alert">
               <span className="fw-bold">Trade matching in progress...</span>
             </div>
           )}

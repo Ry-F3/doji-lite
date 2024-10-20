@@ -57,7 +57,6 @@ const FileNameList = ({ fileNames, onDeleteSuccess, isLoading }) => {
   return (
     <div className="table-responsive-sm">
       <Table striped hover size="sm" className="table-sm table-borderless">
-        {" "}
         {/* Smaller table without borders */}
         <thead>
           <tr>
@@ -96,7 +95,7 @@ const FileNameList = ({ fileNames, onDeleteSuccess, isLoading }) => {
                           role="status"
                           aria-hidden="true"
                           variant="primary"
-                        />{" "}
+                        />
                         ...
                       </>
                     ) : (
